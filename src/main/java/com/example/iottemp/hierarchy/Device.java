@@ -1,4 +1,4 @@
-package com.example.iottemp;
+package com.example.iottemp.hierarchy;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -26,7 +26,7 @@ public class Device extends AbstractBehavior<Device.Command> {
   }
 
   public static final class TemperatureRecorded {
-    final long requestId;
+    public final long requestId;
 
     public TemperatureRecorded(long requestId) {
       this.requestId = requestId;
@@ -44,8 +44,8 @@ public class Device extends AbstractBehavior<Device.Command> {
   }
 
   public static final class RespondTemperature {
-    final long requestId;
-    final Optional<Double> value;
+    public final long requestId;
+    public final Optional<Double> value;
 
     public RespondTemperature(long requestId, Optional<Double> value) {
       this.requestId = requestId;
@@ -75,6 +75,7 @@ public class Device extends AbstractBehavior<Device.Command> {
     return newReceiveBuilder()
             .onMessage(RecordTemperature.class, this::onRecordTemperature)
             .onMessage(ReadTemperature.class, this::onReadTemperature)
+            .onMessage(Passivate.class, m -> Behaviors.stopped())
             .onSignal(PostStop.class, signal -> onPostStop())
             .build();
   }
@@ -94,5 +95,9 @@ public class Device extends AbstractBehavior<Device.Command> {
   private Device onPostStop() {
     getContext().getLog().info("Device actor {}-{} stopped", groupId, deviceId);
     return this;
+  }
+
+  public enum Passivate implements Command {
+    INSTANCE
   }
 }
